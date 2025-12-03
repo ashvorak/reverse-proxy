@@ -1,0 +1,5 @@
+routes:
+  - prefix: "/api/users"
+    upstream: "http://localhost:9001"
+  - prefix: "/api/orders"
+    upstream: "http://localhost:9002"
