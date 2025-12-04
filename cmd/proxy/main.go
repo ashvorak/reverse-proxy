@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"reverse-proxy/internal/config"
+	"reverse-proxy/internal/router"
+	"reverse-proxy/internal/server"
 )
 
 func main() {
@@ -18,14 +18,15 @@ func main() {
 		log.Fatalf("Failed to load config file %v", err)
 	}
 
-	log.Println("Service started with configuration:")
-	for _, r := range config.Routes {
-		log.Printf("Prefix %s, Upstream %s\n", r.Prefix, r.Upstream)
+	router, err := router.New(config.Routes)
+	if err != nil {
+		log.Fatalf("Failed to create router: %v", err)
 	}
 
-	http.HandleFunc("/healthz", func(w http.ResponseWriter, r *http.Request) {
-		fmt.Fprintf(w, "OK")
-	})
+	server, err := server.NewServer(router)
+	if err != nil {
+		log.Fatalf("Failed to create server: %v", err)
+	}
 
-	log.Fatal(http.ListenAndServe(":8080", nil))
+	server.Start()
 }
